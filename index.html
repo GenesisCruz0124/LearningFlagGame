@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flag Quest — Learn the Flags of the World</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>🌍 Flag Quest</h1>
+      <p class="tagline">Learn the flags of the world</p>
+    </header>
+
+    <!-- ===================== MENU SCREEN ===================== -->
+    <section id="screen-menu" class="screen is-active">
+      <h2>Choose a game mode</h2>
+      <div class="mode-grid">
+        <button class="mode-card" data-mode="choice">
+          <span class="mode-icon">🚩</span>
+          <span class="mode-title">Multiple Choice</span>
+          <span class="mode-desc">See a flag, pick the country.</span>
+        </button>
+        <button class="mode-card" data-mode="type">
+          <span class="mode-icon">⌨️</span>
+          <span class="mode-title">Type the Country</span>
+          <span class="mode-desc">See a flag, type its name.</span>
+        </button>
+        <button class="mode-card" data-mode="find">
+          <span class="mode-icon">🔎</span>
+          <span class="mode-title">Find the Flag</span>
+          <span class="mode-desc">See a country, pick its flag.</span>
+        </button>
+        <button class="mode-card" data-mode="timed">
+          <span class="mode-icon">⏱️</span>
+          <span class="mode-title">Timed Challenge</span>
+          <span class="mode-desc">60 seconds. Beat your best!</span>
+        </button>
+      </div>
+
+      <div class="region-picker">
+        <label for="region-select">Region</label>
+        <select id="region-select">
+          <option value="All">All regions</option>
+          <option value="Africa">Africa</option>
+          <option value="Americas">Americas</option>
+          <option value="Asia">Asia</option>
+          <option value="Europe">Europe</option>
+          <option value="Oceania">Oceania</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- ===================== PLAY SCREEN ===================== -->
+    <section id="screen-play" class="screen">
+      <div class="play-bar">
+        <button id="btn-quit" class="btn-ghost" type="button">← Menu</button>
+        <div class="stats">
+          <span class="stat">Score <strong id="stat-score">0</strong></span>
+          <span class="stat">Streak <strong id="stat-streak">0</strong></span>
+          <span class="stat" id="stat-timer-wrap" hidden>Time <strong id="stat-timer">60</strong></span>
+          <span class="stat" id="stat-progress-wrap">Q <strong id="stat-progress">1</strong>/<span id="stat-total">10</span></span>
+        </div>
+      </div>
+
+      <div id="prompt-area" class="prompt-area"></div>
+      <div id="answer-area" class="answer-area"></div>
+      <div id="feedback" class="feedback" aria-live="polite"></div>
+      <button id="btn-next" class="btn-primary" type="button" hidden>Next →</button>
+    </section>
+
+    <!-- ===================== RESULT SCREEN ===================== -->
+    <section id="screen-result" class="screen">
+      <h2>Round complete!</h2>
+      <div class="result-card">
+        <p class="result-score">You scored <strong id="result-score">0</strong> <span id="result-outof"></span></p>
+        <p class="result-best">Best: <strong id="result-best">0</strong> <span id="result-newbest" class="badge" hidden>New best! 🎉</span></p>
+      </div>
+      <div class="result-actions">
+        <button id="btn-again" class="btn-primary" type="button">Play again</button>
+        <button id="btn-home" class="btn-ghost" type="button">Back to menu</button>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <p>Flags by <a href="https://flagcdn.com" target="_blank" rel="noopener">flagcdn.com</a> · works offline with emoji flags</p>
+    </footer>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/flags.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
