@@ -45,5 +45,10 @@ js/ui.js          # DOM rendering, navigation, persistence
 
 ## Deploying
 
-It's a static site — host it anywhere (e.g. GitHub Pages: enable Pages on the
-repo and point it at the branch root).
+It's a static site — host it anywhere.
+
+This repo includes a GitHub Actions workflow
+(`.github/workflows/deploy-pages.yml`) that publishes the site to **GitHub
+Pages** on every push to `main`. To turn it on once: repo **Settings → Pages →
+Build and deployment → Source: GitHub Actions**. After that, pushes to `main`
+deploy automatically to `https://<user>.github.io/<repo>/`.
