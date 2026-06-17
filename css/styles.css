@@ -124,45 +124,6 @@ body {
   text-transform: uppercase;
 }
 
-/* Question-count pills */
-.count-picker {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-.count-picker .settings-label {
-  margin-right: 4px;
-}
-.count-pill {
-  cursor: pointer;
-}
-.count-pill input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.count-pill span {
-  display: inline-block;
-  min-width: 44px;
-  text-align: center;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--bg);
-  color: var(--text-dim);
-  border: 2px solid transparent;
-  font-weight: 700;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-.count-pill input:checked + span {
-  background: var(--accent-strong);
-  color: #04293a;
-}
-.count-pill input:focus-visible + span {
-  border-color: var(--accent);
-}
-
 /* Continent list with toggle switches */
 .flags-heading {
   margin: 0 0 6px;

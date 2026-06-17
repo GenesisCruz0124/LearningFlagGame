@@ -11,10 +11,11 @@ no dependencies — just open it in a browser.
 - **Find the Flag** — see a country name, pick the matching flag.
 - **Timed Challenge** — score as many as you can in 60 seconds.
 
-Each mode tracks your **score** and **streak**, lets you pick how many questions
-per round (**10 / 25 / 50**) and toggle which **continents** to include (Africa,
-Asia, Europe, North America, South America, Oceania), and remembers your **best
-score** per setup in the browser via `localStorage`.
+Each mode tracks your **score** and **streak** and lets you toggle which
+**continents** to include (Africa, Asia, Europe, North America, South America,
+Oceania). A non-timed round shows **every flag in the selected continents exactly
+once** (no repeats), so the round length follows your selection. Your **best
+score** is remembered per setup in the browser via `localStorage`.
 
 ## How to run
 

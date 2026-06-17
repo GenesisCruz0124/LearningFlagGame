@@ -3,7 +3,6 @@
  * Pure logic only — no DOM. The UI layer (ui.js) drives it.
  */
 
-const QUESTIONS_PER_ROUND = 10; // for non-timed modes
 const TIMED_SECONDS = 60;
 
 /** Normalize a string for forgiving text comparison. */
@@ -27,10 +26,6 @@ function shuffle(arr) {
   return a;
 }
 
-function randomItem(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
 /** Filter the country list to the selected regions (array of region names). */
 function buildPool(regions) {
   return COUNTRIES.filter((c) => regions.includes(c.region));
@@ -42,8 +37,7 @@ function buildPool(regions) {
  * back to the full list if the pool is too small — so a restricted round stays
  * on-theme.
  */
-function makeQuestion(pool, mode) {
-  const target = randomItem(pool);
+function makeQuestion(pool, mode, target) {
   const question = { target, mode };
 
   if (mode === "type") return question; // no options needed
@@ -85,7 +79,7 @@ function checkAnswer(input, target, mode) {
  * .current for the active question. Report answers via answer().
  */
 class FlagGame {
-  constructor({ mode, regions, questionCount }) {
+  constructor({ mode, regions }) {
     this.mode = mode;
     this.regions = regions.slice();
     this.pool = buildPool(regions);
@@ -95,8 +89,11 @@ class FlagGame {
     this.answered = 0;
     this.current = null;
     this.isTimed = mode === "timed";
-    this.questionCount = questionCount || QUESTIONS_PER_ROUND;
-    this.totalQuestions = this.isTimed ? Infinity : this.questionCount;
+    // A non-timed round shows every flag in the selected regions exactly once,
+    // so the round length is simply the pool size.
+    this.totalQuestions = this.isTimed ? Infinity : this.pool.length;
+    this.queue = [];
+    this.queueIndex = 0;
   }
 
   start() {
@@ -104,12 +101,21 @@ class FlagGame {
     this.streak = 0;
     this.bestStreak = 0;
     this.answered = 0;
+    // Shuffle the pool into a queue so flags don't repeat within a round.
+    this.queue = shuffle(this.pool);
+    this.queueIndex = 0;
     this.next();
     return this.current;
   }
 
   next() {
-    this.current = makeQuestion(this.pool, this.mode);
+    // Timed mode can outlast the pool — reshuffle and cycle when exhausted.
+    if (this.queueIndex >= this.queue.length) {
+      this.queue = shuffle(this.pool);
+      this.queueIndex = 0;
+    }
+    const target = this.queue[this.queueIndex++];
+    this.current = makeQuestion(this.pool, this.mode, target);
     return this.current;
   }
 

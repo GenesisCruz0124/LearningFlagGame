@@ -27,7 +27,6 @@
     continentInputs: Array.from(
       document.querySelectorAll('.continent-list input[type="checkbox"]')
     ),
-    countInputs: Array.from(document.querySelectorAll('input[name="qcount"]')),
     settingsHint: document.getElementById("settings-hint"),
     resultScore: document.getElementById("result-score"),
     resultOutof: document.getElementById("result-outof"),
@@ -54,18 +53,13 @@
       .filter((c) => c.checked)
       .map((c) => c.dataset.region);
   }
-  function getQuestionCount() {
-    const checked = el.countInputs.find((r) => r.checked);
-    return checked ? parseInt(checked.value, 10) : QUESTIONS_PER_ROUND;
-  }
 
   // ---------------- Persistence ----------------
-  // Best score is scoped to the mode + chosen regions + question count so each
-  // distinct setup keeps its own high score.
+  // Best score is scoped to the mode + chosen regions so each distinct setup
+  // keeps its own high score.
   function bestKey() {
     const regions = game.regions.slice().sort().join("+");
-    const countPart = game.isTimed ? "timed" : game.questionCount;
-    return `flagquest_best_${game.mode}_${regions}_${countPart}`;
+    return `flagquest_best_${game.mode}_${regions}`;
   }
   function getBest() {
     return parseInt(localStorage.getItem(bestKey()) || "0", 10);
@@ -77,7 +71,7 @@
   // Remember the player's menu selections across reloads.
   const SETTINGS_KEY = "flagquest_settings";
   function saveSettings() {
-    const data = { regions: getSelectedRegions(), count: getQuestionCount() };
+    const data = { regions: getSelectedRegions() };
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
   }
   function restoreSettings() {
@@ -93,11 +87,6 @@
         c.checked = data.regions.includes(c.dataset.region);
       });
     }
-    if (data.count) {
-      el.countInputs.forEach((r) => {
-        r.checked = parseInt(r.value, 10) === data.count;
-      });
-    }
   }
 
   // ---------------- Stats bar ----------------
@@ -110,8 +99,8 @@
     } else {
       el.timerWrap.hidden = true;
       el.progressWrap.hidden = false;
-      el.progress.textContent = Math.min(game.answered + 1, game.questionCount);
-      el.total.textContent = game.questionCount;
+      el.progress.textContent = Math.min(game.answered + 1, game.totalQuestions);
+      el.total.textContent = game.totalQuestions;
     }
   }
 
@@ -237,6 +226,10 @@
     }
     updateStats();
 
+    if (game.isOver()) {
+      setTimeout(endRound, 800);
+      return;
+    }
     if (game.isTimed) {
       // Auto-advance quickly in timed mode.
       setTimeout(() => {
@@ -245,8 +238,15 @@
           renderQuestion();
         }
       }, 550);
-    } else if (game.isOver()) {
-      setTimeout(endRound, 700);
+    } else if (game.mode === "type") {
+      // Auto-advance in type mode so the player can keep typing without
+      // reaching for a "Next" button.
+      setTimeout(() => {
+        if (game && !game.isOver()) {
+          game.next();
+          renderQuestion();
+        }
+      }, 1100);
     } else {
       el.btnNext.hidden = false;
       el.btnNext.focus();
@@ -261,7 +261,7 @@
       return;
     }
     el.settingsHint.hidden = true;
-    game = new FlagGame({ mode, regions, questionCount: getQuestionCount() });
+    game = new FlagGame({ mode, regions });
     el.answerArea.classList.remove("flag-options");
     game.start();
     showScreen("play");
@@ -297,7 +297,7 @@
     if (isNewBest) setBest(game.score);
 
     el.resultScore.textContent = game.score;
-    el.resultOutof.textContent = game.isTimed ? "" : `/ ${game.questionCount}`;
+    el.resultOutof.textContent = game.isTimed ? "" : `/ ${game.totalQuestions}`;
     el.resultBest.textContent = isNewBest ? game.score : best;
     el.resultNewBest.hidden = !isNewBest;
     showScreen("result");
@@ -312,7 +312,7 @@
 
   // Persist settings whenever a toggle or count changes; clear the hint once a
   // region is re-enabled.
-  el.continentInputs.concat(el.countInputs).forEach((input) => {
+  el.continentInputs.forEach((input) => {
     input.addEventListener("change", () => {
       saveSettings();
       if (getSelectedRegions().length > 0) el.settingsHint.hidden = true;
