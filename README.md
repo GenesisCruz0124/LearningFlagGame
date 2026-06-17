@@ -63,9 +63,15 @@ Build a debug APK with Gradle (requires JDK 17+ and the Android SDK with
 
 ```bash
 cd android
+./build-apk.sh        # builds + names the APK by version, plus FlagQuest-latest.apk
+# or directly:
 ./gradlew assembleDebug
 # output: app/build/outputs/apk/debug/app-debug.apk
 ```
+
+The version **auto-increments on every build**: `version.properties` holds
+`VERSION_CODE` / `VERSION_NAME`, and each `assemble`/`bundle`/`install` build bumps
+the version code by 1 and the `VERSION_NAME` patch by 1 (e.g. 1.0.1 → 1.0.2).
 
 If you change the web files at the repo root, re-sync them before building
 (including `flags/`):

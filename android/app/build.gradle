@@ -2,6 +2,34 @@ plugins {
     id 'com.android.application'
 }
 
+// ---- Auto-incrementing version --------------------------------------------
+// Reads android/version.properties. On any assemble/bundle/install build it
+// bumps VERSION_CODE by 1 and the patch component of VERSION_NAME by 1, writes
+// the file back, and uses the new values for this build.
+def versionPropsFile = rootProject.file("version.properties")
+def versionProps = new Properties()
+if (versionPropsFile.exists()) {
+    versionPropsFile.withInputStream { versionProps.load(it) }
+}
+def vCode = (versionProps.getProperty("VERSION_CODE", "0")).toInteger()
+def vName = versionProps.getProperty("VERSION_NAME", "1.0.0")
+
+def isPackagingBuild = gradle.startParameter.taskNames.any {
+    it ==~ /(?i).*(assemble|bundle|install).*/
+}
+if (isPackagingBuild) {
+    vCode += 1
+    def parts = vName.tokenize('.')
+    while (parts.size() < 3) { parts << '0' }
+    parts[2] = (parts[2].toInteger() + 1).toString()
+    vName = parts.join('.')
+    versionProps.setProperty("VERSION_CODE", vCode.toString())
+    versionProps.setProperty("VERSION_NAME", vName)
+    versionPropsFile.withWriter { versionProps.store(it, "Auto-incremented on build") }
+    println "Version bumped to ${vName} (code ${vCode})"
+}
+// ---------------------------------------------------------------------------
+
 android {
     namespace 'com.flagquest.app'
     compileSdk 34
@@ -10,8 +38,8 @@ android {
         applicationId "com.flagquest.app"
         minSdk 21
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode vCode
+        versionName vName
     }
 
     buildTypes {
