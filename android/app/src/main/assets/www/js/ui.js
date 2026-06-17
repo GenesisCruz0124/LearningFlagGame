@@ -127,7 +127,7 @@
   function renderFlag(code) {
     const wrap = document.createElement("div");
     wrap.className = "flag-frame";
-    wrap.appendChild(createFlagElement(code, { width: 320 }));
+    wrap.appendChild(createFlagElement(code));
     return wrap;
   }
 
@@ -158,7 +158,7 @@
       btn.className = "flag-option-btn";
       btn.type = "button";
       btn.dataset.code = opt.code;
-      btn.appendChild(createFlagElement(opt.code, { width: 320 }));
+      btn.appendChild(createFlagElement(opt.code));
       btn.addEventListener("click", () => handleChoice(opt.code, btn));
       el.answerArea.appendChild(btn);
     });

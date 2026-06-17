@@ -141,5 +141,14 @@
   <script src="js/flags.js"></script>
   <script src="js/game.js"></script>
   <script src="js/ui.js"></script>
+  <script>
+    // Register the service worker so the game is fully playable offline after
+    // the first load. Harmless where unsupported (e.g. file:// in the APK).
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>

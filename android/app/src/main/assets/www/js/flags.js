@@ -1,10 +1,12 @@
 /**
- * Flag helpers: build CDN image URLs and an offline emoji fallback.
+ * Flag helpers: build local image paths and an offline emoji fallback.
+ * Flags are bundled in the local `flags/` folder (SVG) so the game works with
+ * no internet connection.
  */
 
-/** Build a flagcdn.com PNG URL for a given ISO alpha-2 code. */
-function flagImageUrl(code, width = 320) {
-  return `https://flagcdn.com/w${width}/${code.toLowerCase()}.png`;
+/** Path to the locally bundled SVG flag for a given ISO alpha-2 code. */
+function flagImageUrl(code) {
+  return `flags/${code.toLowerCase()}.svg`;
 }
 
 /**
@@ -22,14 +24,14 @@ function flagEmoji(code) {
 
 /**
  * Return an <img> element for a flag that falls back to an emoji span if the
- * CDN image fails to load (offline / blocked).
+ * local image fails to load.
  */
-function createFlagElement(code, { width = 320, className = "flag-img" } = {}) {
+function createFlagElement(code, { className = "flag-img" } = {}) {
   const img = document.createElement("img");
   img.className = className;
   img.alt = "Flag";
   img.loading = "lazy";
-  img.src = flagImageUrl(code, width);
+  img.src = flagImageUrl(code);
   img.addEventListener("error", () => {
     const span = document.createElement("span");
     span.className = "flag-emoji";

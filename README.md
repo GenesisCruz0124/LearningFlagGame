@@ -30,19 +30,26 @@ python3 -m http.server 8000
 
 ## Flags & offline use
 
-Flag images are loaded from [flagcdn.com](https://flagcdn.com). If you're offline
-or the CDN is blocked, the game automatically falls back to Unicode flag emojis,
-so it stays playable everywhere (emoji rendering quality varies by OS).
+All flag images are **bundled locally** as SVGs in `flags/` (one per ISO code,
+originally from [flagcdn.com](https://flagcdn.com)), so the game needs **no
+internet**. If an image ever fails to load, it falls back to a Unicode flag emoji.
+
+- **Web**: a service worker (`sw.js`) precaches the app and every flag on first
+  load, so the site works offline afterwards (and is installable as a PWA).
+- **Android**: the APK ships all flags inside the app — fully offline, no
+  permissions required.
 
 ## Project structure
 
 ```
 index.html        # screens: menu, play, result
+sw.js             # service worker (offline precache of app + flags)
 css/styles.css    # styling, responsive layout, feedback states
 js/data.js        # country dataset (code, name, region, aliases)
-js/flags.js       # flag image URLs + emoji fallback
+js/flags.js       # local flag paths + emoji fallback
 js/game.js        # game engine: questions, scoring, answer checking
 js/ui.js          # DOM rendering, navigation, persistence
+flags/            # 197 bundled SVG flags (xx.svg by ISO code)
 ```
 
 ## Android APK
@@ -60,16 +67,18 @@ cd android
 # output: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-If you change the web files at the repo root, re-sync them before building:
+If you change the web files at the repo root, re-sync them before building
+(including `flags/`):
 
 ```bash
 cp index.html android/app/src/main/assets/www/
 cp css/styles.css android/app/src/main/assets/www/css/
+cp flags/*.svg android/app/src/main/assets/www/flags/
 cp js/*.js android/app/src/main/assets/www/js/
 ```
 
-App id `com.flagquest.app`, minSdk 21, targetSdk 34. The `INTERNET` permission is
-declared so flag images load from flagcdn.com (emoji fallback works offline).
+App id `com.flagquest.app`, minSdk 21, targetSdk 34. No permissions are required —
+all flags are bundled in the APK, so it runs fully offline.
 
 ## Deploying
 
