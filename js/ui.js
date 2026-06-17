@@ -24,7 +24,11 @@
     progressWrap: document.getElementById("stat-progress-wrap"),
     progress: document.getElementById("stat-progress"),
     total: document.getElementById("stat-total"),
-    regionSelect: document.getElementById("region-select"),
+    continentInputs: Array.from(
+      document.querySelectorAll('.continent-list input[type="checkbox"]')
+    ),
+    countInputs: Array.from(document.querySelectorAll('input[name="qcount"]')),
+    settingsHint: document.getElementById("settings-hint"),
     resultScore: document.getElementById("result-score"),
     resultOutof: document.getElementById("result-outof"),
     resultBest: document.getElementById("result-best"),
@@ -44,15 +48,56 @@
     screens[name].classList.add("is-active");
   }
 
+  // ---------------- Settings (read from menu controls) ----------------
+  function getSelectedRegions() {
+    return el.continentInputs
+      .filter((c) => c.checked)
+      .map((c) => c.dataset.region);
+  }
+  function getQuestionCount() {
+    const checked = el.countInputs.find((r) => r.checked);
+    return checked ? parseInt(checked.value, 10) : QUESTIONS_PER_ROUND;
+  }
+
   // ---------------- Persistence ----------------
+  // Best score is scoped to the mode + chosen regions + question count so each
+  // distinct setup keeps its own high score.
   function bestKey() {
-    return `flagquest_best_${game.mode}_${el.regionSelect.value}`;
+    const regions = game.regions.slice().sort().join("+");
+    const countPart = game.isTimed ? "timed" : game.questionCount;
+    return `flagquest_best_${game.mode}_${regions}_${countPart}`;
   }
   function getBest() {
     return parseInt(localStorage.getItem(bestKey()) || "0", 10);
   }
   function setBest(value) {
     localStorage.setItem(bestKey(), String(value));
+  }
+
+  // Remember the player's menu selections across reloads.
+  const SETTINGS_KEY = "flagquest_settings";
+  function saveSettings() {
+    const data = { regions: getSelectedRegions(), count: getQuestionCount() };
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
+  }
+  function restoreSettings() {
+    let data;
+    try {
+      data = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    } catch (e) {
+      data = null;
+    }
+    if (!data) return;
+    if (Array.isArray(data.regions)) {
+      el.continentInputs.forEach((c) => {
+        c.checked = data.regions.includes(c.dataset.region);
+      });
+    }
+    if (data.count) {
+      el.countInputs.forEach((r) => {
+        r.checked = parseInt(r.value, 10) === data.count;
+      });
+    }
   }
 
   // ---------------- Stats bar ----------------
@@ -65,8 +110,8 @@
     } else {
       el.timerWrap.hidden = true;
       el.progressWrap.hidden = false;
-      el.progress.textContent = Math.min(game.answered + 1, QUESTIONS_PER_ROUND);
-      el.total.textContent = QUESTIONS_PER_ROUND;
+      el.progress.textContent = Math.min(game.answered + 1, game.questionCount);
+      el.total.textContent = game.questionCount;
     }
   }
 
@@ -210,7 +255,13 @@
 
   // ---------------- Round lifecycle ----------------
   function startRound(mode) {
-    game = new FlagGame({ mode, region: el.regionSelect.value });
+    const regions = getSelectedRegions();
+    if (regions.length === 0) {
+      el.settingsHint.hidden = false;
+      return;
+    }
+    el.settingsHint.hidden = true;
+    game = new FlagGame({ mode, regions, questionCount: getQuestionCount() });
     el.answerArea.classList.remove("flag-options");
     game.start();
     showScreen("play");
@@ -246,15 +297,26 @@
     if (isNewBest) setBest(game.score);
 
     el.resultScore.textContent = game.score;
-    el.resultOutof.textContent = game.isTimed ? "" : `/ ${QUESTIONS_PER_ROUND}`;
+    el.resultOutof.textContent = game.isTimed ? "" : `/ ${game.questionCount}`;
     el.resultBest.textContent = isNewBest ? game.score : best;
     el.resultNewBest.hidden = !isNewBest;
     showScreen("result");
   }
 
   // ---------------- Event wiring ----------------
+  restoreSettings();
+
   document.querySelectorAll(".mode-card").forEach((card) => {
     card.addEventListener("click", () => startRound(card.dataset.mode));
+  });
+
+  // Persist settings whenever a toggle or count changes; clear the hint once a
+  // region is re-enabled.
+  el.continentInputs.concat(el.countInputs).forEach((input) => {
+    input.addEventListener("change", () => {
+      saveSettings();
+      if (getSelectedRegions().length > 0) el.settingsHint.hidden = true;
+    });
   });
 
   el.btnNext.addEventListener("click", () => {

@@ -31,15 +31,16 @@ function randomItem(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/** Filter the country list by region ("All" returns everything). */
-function buildPool(region) {
-  if (!region || region === "All") return COUNTRIES.slice();
-  return COUNTRIES.filter((c) => c.region === region);
+/** Filter the country list to the selected regions (array of region names). */
+function buildPool(regions) {
+  return COUNTRIES.filter((c) => regions.includes(c.region));
 }
 
 /**
  * Build one question. For choice/find/timed we need distractors; we prefer
- * same-region distractors and top up from the whole list if needed.
+ * same-region picks, then other countries in the selected pool, and only fall
+ * back to the full list if the pool is too small — so a restricted round stays
+ * on-theme.
  */
 function makeQuestion(pool, mode) {
   const target = randomItem(pool);
@@ -48,16 +49,21 @@ function makeQuestion(pool, mode) {
   if (mode === "type") return question; // no options needed
 
   const optionCount = 4;
-  let sameRegion = pool.filter(
-    (c) => c.code !== target.code && c.region === target.region
-  );
-  let others = COUNTRIES.filter(
-    (c) => c.code !== target.code && c.region !== target.region
-  );
-  const distractors = shuffle(sameRegion).slice(0, optionCount - 1);
-  if (distractors.length < optionCount - 1) {
-    const need = optionCount - 1 - distractors.length;
-    distractors.push(...shuffle(others).slice(0, need));
+  const sameRegion = pool.filter((c) => c.code !== target.code && c.region === target.region);
+  const poolOther = pool.filter((c) => c.code !== target.code && c.region !== target.region);
+  const anyOther = COUNTRIES.filter((c) => c.code !== target.code);
+
+  const distractors = [];
+  const used = new Set([target.code]);
+  for (const group of [sameRegion, poolOther, anyOther]) {
+    for (const c of shuffle(group)) {
+      if (distractors.length >= optionCount - 1) break;
+      if (!used.has(c.code)) {
+        used.add(c.code);
+        distractors.push(c);
+      }
+    }
+    if (distractors.length >= optionCount - 1) break;
   }
   question.options = shuffle([target, ...distractors]);
   return question;
@@ -79,16 +85,18 @@ function checkAnswer(input, target, mode) {
  * .current for the active question. Report answers via answer().
  */
 class FlagGame {
-  constructor({ mode, region }) {
+  constructor({ mode, regions, questionCount }) {
     this.mode = mode;
-    this.pool = buildPool(region);
+    this.regions = regions.slice();
+    this.pool = buildPool(regions);
     this.score = 0;
     this.streak = 0;
     this.bestStreak = 0;
     this.answered = 0;
     this.current = null;
     this.isTimed = mode === "timed";
-    this.totalQuestions = this.isTimed ? Infinity : QUESTIONS_PER_ROUND;
+    this.questionCount = questionCount || QUESTIONS_PER_ROUND;
+    this.totalQuestions = this.isTimed ? Infinity : this.questionCount;
   }
 
   start() {

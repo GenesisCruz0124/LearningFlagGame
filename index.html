@@ -39,16 +39,81 @@
         </button>
       </div>
 
-      <div class="region-picker">
-        <label for="region-select">Region</label>
-        <select id="region-select">
-          <option value="All">All regions</option>
-          <option value="Africa">Africa</option>
-          <option value="Americas">Americas</option>
-          <option value="Asia">Asia</option>
-          <option value="Europe">Europe</option>
-          <option value="Oceania">Oceania</option>
-        </select>
+      <div class="settings">
+        <div class="count-picker" role="radiogroup" aria-label="Questions per round">
+          <span class="settings-label">Questions</span>
+          <label class="count-pill">
+            <input type="radio" name="qcount" value="10" />
+            <span>10</span>
+          </label>
+          <label class="count-pill">
+            <input type="radio" name="qcount" value="25" checked />
+            <span>25</span>
+          </label>
+          <label class="count-pill">
+            <input type="radio" name="qcount" value="50" />
+            <span>50</span>
+          </label>
+        </div>
+
+        <h3 class="settings-label flags-heading">Flags</h3>
+        <ul class="continent-list">
+          <li class="continent-row">
+            <label>
+              <span>Africa</span>
+              <span class="switch">
+                <input type="checkbox" data-region="Africa" checked />
+                <span class="slider"></span>
+              </span>
+            </label>
+          </li>
+          <li class="continent-row">
+            <label>
+              <span>Asia</span>
+              <span class="switch">
+                <input type="checkbox" data-region="Asia" checked />
+                <span class="slider"></span>
+              </span>
+            </label>
+          </li>
+          <li class="continent-row">
+            <label>
+              <span>Europe</span>
+              <span class="switch">
+                <input type="checkbox" data-region="Europe" checked />
+                <span class="slider"></span>
+              </span>
+            </label>
+          </li>
+          <li class="continent-row">
+            <label>
+              <span>North America</span>
+              <span class="switch">
+                <input type="checkbox" data-region="North America" checked />
+                <span class="slider"></span>
+              </span>
+            </label>
+          </li>
+          <li class="continent-row">
+            <label>
+              <span>South America</span>
+              <span class="switch">
+                <input type="checkbox" data-region="South America" checked />
+                <span class="slider"></span>
+              </span>
+            </label>
+          </li>
+          <li class="continent-row">
+            <label>
+              <span>Oceania</span>
+              <span class="switch">
+                <input type="checkbox" data-region="Oceania" checked />
+                <span class="slider"></span>
+              </span>
+            </label>
+          </li>
+        </ul>
+        <p id="settings-hint" class="settings-hint" hidden>Pick at least one region to play.</p>
       </div>
     </section>
 
