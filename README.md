@@ -45,6 +45,32 @@ js/game.js        # game engine: questions, scoring, answer checking
 js/ui.js          # DOM rendering, navigation, persistence
 ```
 
+## Android APK
+
+A native Android wrapper (a full-screen `WebView` that loads the bundled game)
+lives in `android/`. The web files are copied into
+`android/app/src/main/assets/www/`.
+
+Build a debug APK with Gradle (requires JDK 17+ and the Android SDK with
+`platforms;android-34` and `build-tools;34.0.0`):
+
+```bash
+cd android
+./gradlew assembleDebug
+# output: app/build/outputs/apk/debug/app-debug.apk
+```
+
+If you change the web files at the repo root, re-sync them before building:
+
+```bash
+cp index.html android/app/src/main/assets/www/
+cp css/styles.css android/app/src/main/assets/www/css/
+cp js/*.js android/app/src/main/assets/www/js/
+```
+
+App id `com.flagquest.app`, minSdk 21, targetSdk 34. The `INTERNET` permission is
+declared so flag images load from flagcdn.com (emoji fallback works offline).
+
 ## Deploying
 
 It's a static site — host it anywhere.
